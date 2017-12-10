@@ -2,39 +2,45 @@ pico-8 cartridge // http://www.pico-8.com
 version 15
 __lua__
 
-x = 64  y = 64
-a = 10  b = 10
+herder = { x = 64, y = 64, type = "herder" }
+cats = [
+  { x = 10, y = 10, type = "cat" }
+]
 
 function _update()
-   if (btn(0)) then x=x-1 end
-   if (btn(1)) then x=x+1 end
-   if (btn(2)) then y=y-1 end
-   if (btn(3)) then y=y+1 end
-   move_away()
-   x = limit(x)
-   y = limit(y)
-   a = limit(a)
-   b = limit(b)
+   move_herder(herder)
+   for c in cats
+      move_cat(c,herder)
+   end
 end
 
 function _draw()
    rectfill(0,0,127,127,5)
-   circfill(x,y,2,8)
-   circfill(a,b,2,9)
+   circfill(herder.x,herder.y,2,8)
+   for c in cats
+      circfill(c.x,c.y,2,9)
+   end
 end
 
-function move_away()
-   if distance() < 32 then
-      if x > a then
-	 a = a - 1
-      else
-	 a = a + 1
-      end
-      if y > b then
-	 b = b - 1
-      else
-	 b = b + 1
-      end
+function move_herder(h)
+   if (btn(0)) then h.x=h.x-1 end
+   if (btn(1)) then h.x=h.x+1 end
+   if (btn(2)) then h.y=h.y-1 end
+   if (btn(3)) then h.y=h.y+1 end
+end
+
+function move_cat(c,h)
+   if distance(c,h) < 32 then
+      c.x = away_from(c.x,h.x)
+      c.y = away_from(c.y,h.y)
+   end
+end
+
+function away_from(x1,x2)
+   if x1 < x2 then
+      return limit(x1-1)
+   else
+      return limit(x1+1)
    end
 end
 
@@ -44,6 +50,6 @@ function limit(a)
    return a
 end
 
-function distance()
-   return sqrt((x-a)^2 + (y-b)^2)
+function distance(a,b)
+   return sqrt((a.x-b.x)^2 + (a.y-b.y)^2)
 end
