@@ -3,13 +3,13 @@ version 15
 __lua__
 
 herder = { x = 64, y = 64, type = "herder" }
-cats = [
+cats = {
   { x = 10, y = 10, type = "cat" }
-]
+}
 
 function _update()
    move_herder(herder)
-   for c in cats
+   for c in all(cats) do
       move_cat(c,herder)
    end
 end
@@ -17,16 +17,16 @@ end
 function _draw()
    rectfill(0,0,127,127,5)
    circfill(herder.x,herder.y,2,8)
-   for c in cats
+   for c in all(cats) do
       circfill(c.x,c.y,2,9)
    end
 end
 
 function move_herder(h)
-   if (btn(0)) then h.x=h.x-1 end
-   if (btn(1)) then h.x=h.x+1 end
-   if (btn(2)) then h.y=h.y-1 end
-   if (btn(3)) then h.y=h.y+1 end
+   if (btn(0)) then h.x=limit(h.x-1) end
+   if (btn(1)) then h.x=limit(h.x+1) end
+   if (btn(2)) then h.y=limit(h.y-1) end
+   if (btn(3)) then h.y=limit(h.y+1) end
 end
 
 function move_cat(c,h)
@@ -39,8 +39,12 @@ end
 function away_from(x1,x2)
    if x1 < x2 then
       return limit(x1-1)
-   else
+   elseif x1 > x2 then
       return limit(x1+1)
+   elseif flr(rnd(2)) == 0 then
+      return limit(x1+1)
+   else
+      return limit(x1-1)
    end
 end
 
