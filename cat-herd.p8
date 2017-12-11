@@ -4,7 +4,16 @@ __lua__
 
 herder = { x=64, y=64, v=0 }
 cats = {
-   { x=10, y=10, vs=0, vx=0, vy=0, i=flr(rnd(32)) }
+   { x=10, y=10, vs=0, vx=0, vy=0, i=flr(rnd(32)) },
+   { x=90, y=90, vs=0, vx=0, vy=0, i=flr(rnd(32)) },
+}
+walls = {
+   { x=0, y=0, w=127, h=5},
+   { x=0, y=122, w=127, h=5},
+   { x=0, y=0, w=5, h=127},
+   { x=122, y=0, w=5, h=127},
+   { x=62, y=0, w=5, h=54},
+   { x=62, y=73, w=5, h=55},
 }
 
 function _update()
@@ -16,6 +25,9 @@ end
 
 function _draw()
    rectfill(0,0,127,127,5)
+   for w in all(walls) do
+      rectfill(w.x,w.y,w.x+w.w,w.y+w.h,1)
+   end
    circfill(herder.x,herder.y,2,8)
    for c in all(cats) do
       circfill(c.x,c.y,2,9)
@@ -23,10 +35,10 @@ function _draw()
 end
 
 function move_herder(h)
-   if (btn(0)) then h.x=limit(h.x-1) end
-   if (btn(1)) then h.x=limit(h.x+1) end
-   if (btn(2)) then h.y=limit(h.y-1) end
-   if (btn(3)) then h.y=limit(h.y+1) end
+   if (btn(0)) then h.x,h.y=move(h.x,h.y,-1,0) end
+   if (btn(1)) then h.x,h.y=move(h.x,h.y,1,0) end
+   if (btn(2)) then h.x,h.y=move(h.x,h.y,0,-1) end
+   if (btn(3)) then h.x,h.y=move(h.x,h.y,0,1) end
 end
 
 function move_cat(c,h)
@@ -51,33 +63,51 @@ function move_cat(c,h)
 	 c.vx = flr(rnd(3))-1
 	 c.vy = flr(rnd(3))-1
       end
-      c.x = limit(c.x + c.vx)
-      c.y = limit(c.y + c.vy)
-   elseif c.vs > 0 then
+      c.x,c.y = move(c.x,c.y,c.vx,c.vy)
+   else
       --run
       for _=1,c.vs do
-         c.x, c.vx = away_from(c.x,h.x)
-         c.y, c.vy = away_from(c.y,h.y)
+         c.vx = away_from(c.x,h.x)
+	 c.vy = away_from(c.y,h.y)
+	 c.x,c.y = move(c.x,c.y,c.vx,0)
+	 c.x,c.y = move(c.x,c.y,0,c.vy)
       end
    end
 end
 
 function away_from(x1,x2)
+   local vx, vy = 0, 0
    if x1 < x2 then
-      return limit(x1-1),-1
+      vx = -1
    elseif x1 > x2 then
-      return limit(x1+1),1
+      vx = 1
    elseif flr(rnd(2)) == 0 then
-      return limit(x1+1),1
+      vx = -1
    else
-      return limit(x1-1),-1
+      vx = 1
    end
+   return vx,vy
 end
 
-function limit(a)
-   if a > 127 then return 127 end
-   if a < 0 then return 0 end
-   return a
+function move(x1,y1,dx,dy)
+   local x2 = x1 + dx
+   local y2 = y1 + dy
+   --stay within the map
+   if x2 > 127 then x2 = 127 end
+   if x2 < 0 then x2 = 0 end
+   if y2 > 127 then y2 = 127 end
+   if y2 < 0 then y2 = 0 end
+   --avoid walls
+   for w in all(walls) do
+      if x2 > w.x and
+	 x2 < w.x + w.w and
+	 y2 > w.y and
+	 y2 < w.y + w.h
+      then
+	 return x1,y1
+      end
+   end
+   return x2,y2
 end
 
 function distance(a,b)
