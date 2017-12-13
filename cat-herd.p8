@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 15
+version 10
 __lua__
 
 herder = { x=64, y=64, v=0 }
@@ -48,7 +48,7 @@ function move_cat(c,h)
       c.vs = flr((50-d)/8)
    else
       --decelerate
-      c.vs = ceil(c.vs/1.1)
+      c.vs = flr(c.vs/1.1)
    end
    c.vs = max(1,c.vs)
    if c.vs == 1 then
