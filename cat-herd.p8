@@ -1,37 +1,101 @@
 pico-8 cartridge // http://www.pico-8.com
-version 10
+version 15
 __lua__
 
-herder = { x=64, y=64, v=0 }
-cats = {
-   { x=10, y=10, vs=0, vx=0, vy=0, i=flr(rnd(32)) },
-   { x=90, y=90, vs=0, vx=0, vy=0, i=flr(rnd(32)) },
+current_level = 1
+levels = {
+   {
+      walls = {
+	 { x=0, y=0, w=127, h=5},
+	 { x=0, y=122, w=127, h=5},
+	 { x=0, y=0, w=5, h=127},
+	 { x=122, y=0, w=5, h=127},
+	 { x=62, y=0, w=5, h=54},
+	 { x=62, y=73, w=5, h=55},
+      },
+      herder = { x=64, y=64, v=0 },
+      cats = {
+	{ x=10, y=10, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
+	{ x=90, y=90, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
+      },
+      beds = {
+	 { x=68, y=110, w=20, h=11, c=9 },
+      }
+   },
+   {
+      walls = {
+	 { x=0, y=0, w=127, h=5},
+	 { x=0, y=122, w=127, h=5},
+	 { x=0, y=0, w=5, h=127},
+	 { x=122, y=0, w=5, h=127},
+	 { x=62, y=0, w=5, h=54},
+	 { x=62, y=73, w=5, h=55},
+      },
+      herder = { x=64, y=64, v=0 },
+      cats = {
+	{ x=10, y=10, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
+	{ x=90, y=90, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
+      },
+      beds = {
+	 { x=80, y=110, w=20, h=11, c=9 },
+      }
+   }
 }
-walls = {
-   { x=0, y=0, w=127, h=5},
-   { x=0, y=122, w=127, h=5},
-   { x=0, y=0, w=5, h=127},
-   { x=122, y=0, w=5, h=127},
-   { x=62, y=0, w=5, h=54},
-   { x=62, y=73, w=5, h=55},
-}
+l = levels[current_level]
+game_on = true
 
 function _update()
-   move_herder(herder)
-   for c in all(cats) do
-      move_cat(c,herder)
+   if game_on and is_win() then
+      game_on = false
+      level_up()
+   end
+   if game_on then
+      move_herder(l.herder)
+      for c in all(l.cats) do
+	 move_cat(c,l.herder)
+      end
    end
 end
 
 function _draw()
    rectfill(0,0,127,127,5)
-   for w in all(walls) do
+   for b in all(l.beds) do
+      rect(b.x,b.y,b.x+b.w,b.y+b.h,b.c)
+   end
+   for w in all(l.walls) do
       rectfill(w.x,w.y,w.x+w.w,w.y+w.h,1)
    end
-   circfill(herder.x,herder.y,2,8)
-   for c in all(cats) do
+   circfill(l.herder.x,l.herder.y,2,8)
+   for c in all(l.cats) do
       circfill(c.x,c.y,2,9)
    end
+end
+
+function is_win()
+   for c in all(l.cats) do
+      local in_bed = false
+      for b in all(l.beds) do
+	 if c.x >= b.x and
+	    c.x <= b.x+b.w and
+	    c.y >= b.y and
+	    c.y <= b.y+b.h
+	 then
+	    in_bed = true
+	 end
+      end
+      if not in_bed then return false end
+   end
+   return true
+end
+
+function level_up()
+   current_level = current_level + 1
+   if levels[current_level] == nil then
+      --game over
+      return
+   end
+   l = levels[current_level]
+   game_on = true
 end
 
 function move_herder(h)
@@ -98,11 +162,11 @@ function move(x1,y1,dx,dy)
    if y2 > 127 then y2 = 127 end
    if y2 < 0 then y2 = 0 end
    --avoid walls
-   for w in all(walls) do
-      if x2 > w.x and
-	 x2 < w.x + w.w and
-	 y2 > w.y and
-	 y2 < w.y + w.h
+   for w in all(l.walls) do
+      if x2 > w.x-2 and
+	 x2 < w.x+2 + w.w and
+	 y2 > w.y-2 and
+	 y2 < w.y+2 + w.h
       then
 	 return x1,y1
       end
