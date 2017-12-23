@@ -1,48 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 15
+version 10
 __lua__
 
 current_level = 1
-levels = {
-   {
-      walls = {
-	 { x=0, y=0, w=127, h=5},
-	 { x=0, y=122, w=127, h=5},
-	 { x=0, y=0, w=5, h=127},
-	 { x=122, y=0, w=5, h=127},
-	 { x=62, y=0, w=5, h=54},
-	 { x=62, y=73, w=5, h=55},
-      },
-      herder = { x=64, y=64, v=0 },
-      cats = {
-	{ x=10, y=10, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
-	{ x=90, y=90, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
-      },
-      beds = {
-	 { x=68, y=110, w=20, h=11, c=9 },
-      }
-   },
-   {
-      walls = {
-	 { x=0, y=0, w=127, h=5},
-	 { x=0, y=122, w=127, h=5},
-	 { x=0, y=0, w=5, h=127},
-	 { x=122, y=0, w=5, h=127},
-	 { x=62, y=0, w=5, h=54},
-	 { x=62, y=73, w=5, h=55},
-      },
-      herder = { x=64, y=64, v=0 },
-      cats = {
-	{ x=10, y=10, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
-	{ x=90, y=90, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=9 },
-      },
-      beds = {
-	 { x=80, y=110, w=20, h=11, c=9 },
-      }
-   }
-}
-l = levels[current_level]
-game_on = true
 
 function _update()
    if game_on and is_win() then
@@ -67,7 +27,7 @@ function _draw()
    end
    circfill(l.herder.x,l.herder.y,2,8)
    for c in all(l.cats) do
-      circfill(c.x,c.y,2,9)
+      circfill(c.x,c.y,2,c.c)
    end
 end
 
@@ -177,3 +137,67 @@ end
 function distance(a,b)
    return sqrt((a.x-b.x)^2 + (a.y-b.y)^2)
 end
+
+function _init()
+   rooms = {
+      {
+	 make_h_wall(0,0,127),
+	 make_h_wall(0,122,127),
+	 make_v_wall(0,0,127),
+	 make_v_wall(122,0,127),
+	 make_v_wall(62,0,54),
+	 make_v_wall(62,73,55),
+      },
+   }
+   levels = {
+      {
+	 walls = rooms[1],
+	 herder = { x=64, y=64, v=0 },
+	 cats = {
+	    make_cat(10,10,9),
+	    make_cat(90,90,9),
+	 },
+	 beds = {
+	    { x=68, y=110, w=20, h=11, c=9 },
+	 }
+      },
+      {
+	 walls = rooms[1],
+	 herder = { x=64, y=64, v=0 },
+	 cats = {
+	    make_cat(10,10,9),
+	    make_cat(90,90,9),
+	 },
+	 beds = {
+	    { x=80, y=110, w=20, h=11, c=9 },
+	 }
+      },
+      {
+	 walls = rooms[1],
+	 herder = { x=64, y=64, v=0 },
+	 cats = {
+	    make_cat(10,10,9),
+	    make_cat(90,90,6),
+	 },
+	 beds = {
+	    { x=68, y=110, w=20, h=11, c=9 },
+	    { x=41, y=6, w=20, h=11, c=6 },
+	 }
+      },
+   }
+   l = levels[current_level]
+   game_on = true
+end
+
+function make_cat(x,y,c)
+   return { x=x, y=y, vs=0, vx=0, vy=0, i=flr(rnd(32)), c=c }
+end
+
+function make_h_wall(x,y,l)
+   return { x=x, y=y, w=l, h=5 }
+end
+
+function make_v_wall(x,y,l)
+   return { x=x, y=y, w=5, h=l }
+end
+
