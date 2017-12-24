@@ -161,6 +161,14 @@ function init_levels()
 	 make_v_wall(62,0,54),
 	 make_v_wall(62,73,55),
       },
+      {
+	 make_h_wall(0,0,127),
+	 make_h_wall(0,122,127),
+	 make_v_wall(0,0,127),
+	 make_v_wall(122,0,127),
+	 make_h_wall(64,43,64),
+	 make_h_wall(64,83,64),
+      },
    }
    levels = {
       {
@@ -195,6 +203,20 @@ function init_levels()
 	 beds = {
 	    { x=68, y=110, w=20, h=11, c=9 },
 	    { x=41, y=6, w=20, h=11, c=6 },
+	 }
+      },
+      {
+	 walls = rooms[2],
+	 herder = { x=64, y=64, v=0 },
+	 cats = {
+	    make_cat(30,15,6),
+	    make_cat(30,64,9),
+	    make_cat(30,110,4),
+	 },
+	 beds = {
+	    { x=96, y=6, w=25, h=36, c=9 },
+	    { x=96, y=49, w=25, h=33, c=4 },
+	    { x=96, y=89, w=25, h=32, c=6 },
 	 }
       },
    }
