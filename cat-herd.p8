@@ -1,8 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 10
+version 8
 __lua__
 
-current_level = 1
+level = 1
 
 function _update()
    if game_on and is_win() then
@@ -10,38 +10,39 @@ function _update()
       level_up()
    end
    if game_on then
-      move_herder(l.herder)
-      for c in all(l.cats) do
-	 move_cat(c,l.herder)
+      move_herder(herder)
+      for c in all(cats) do
+         move_cat(c,herder)
       end
    end
 end
 
 function _draw()
    rectfill(0,0,127,127,5)
-   for b in all(l.beds) do
+   for b in all(beds) do
       rect(b.x,b.y,b.x+b.w,b.y+b.h,b.c)
    end
-   for w in all(l.walls) do
+   for w in all(walls) do
       rectfill(w.x,w.y,w.x+w.w,w.y+w.h,1)
    end
-   circfill(l.herder.x,l.herder.y,2,8)
-   for c in all(l.cats) do
+   circfill(herder.x,herder.y,2,8)
+   for c in all(cats) do
       circfill(c.x,c.y,2,c.c)
    end
 end
 
 function is_win()
-   for c in all(l.cats) do
+   for c in all(cats) do
       local in_bed = false
-      for b in all(l.beds) do
-	 if c.x >= b.x and
-	    c.x <= b.x+b.w and
-	    c.y >= b.y and
-	    c.y <= b.y+b.h
-	 then
-	    in_bed = true
-	 end
+      for b in all(beds) do
+         if c.x >= b.x and
+            c.x <= b.x+b.w and
+            c.y >= b.y and
+            c.y <= b.y+b.h and
+	    c.c == b.c
+         then
+            in_bed = true
+         end
       end
       if not in_bed then return false end
    end
@@ -49,13 +50,12 @@ function is_win()
 end
 
 function level_up()
-   current_level = current_level + 1
-   if levels[current_level] == nil then
-      --game over
-      return
+   level = level + 1
+   if levels[level] == nil then
+      level = 1
+      init_levels()
    end
-   l = levels[current_level]
-   game_on = true
+   init_level()
 end
 
 function move_herder(h)
@@ -122,7 +122,7 @@ function move(x1,y1,dx,dy)
    if y2 > 127 then y2 = 127 end
    if y2 < 0 then y2 = 0 end
    --avoid walls
-   for w in all(l.walls) do
+   for w in all(walls) do
       if x2 > w.x-2 and
 	 x2 < w.x+2 + w.w and
 	 y2 > w.y-2 and
@@ -139,6 +139,19 @@ function distance(a,b)
 end
 
 function _init()
+   init_levels()
+   init_level()
+end
+
+function init_level()
+   walls = levels[level].walls
+   cats = levels[level].cats
+   herder = levels[level].herder
+   beds = levels[level].beds
+   game_on = true
+end
+
+function init_levels()
    rooms = {
       {
 	 make_h_wall(0,0,127),
@@ -185,8 +198,6 @@ function _init()
 	 }
       },
    }
-   l = levels[current_level]
-   game_on = true
 end
 
 function make_cat(x,y,c)
